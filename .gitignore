@@ -3,3 +3,4 @@ misc.xml
 modules.xml
 tarifa-branca-multiagente.iml
 vcs.xml
+**/*__pycache__
