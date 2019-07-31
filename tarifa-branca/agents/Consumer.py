@@ -21,7 +21,7 @@ class Consumer(Agent):
         super().__init__(unique_id, model)
         self.subscribe = False
         self.flexibility = np.random.rand()
-        # self.consumption = ConsumptionCurve(obj1, obj2, obj3, obj4...) add this later
+        # self.consumption = ChargeCurve(obj1, obj2, obj3, obj4...) add this later
 
     def step(self):
         choice = self.choose_subscription()
@@ -29,11 +29,15 @@ class Consumer(Agent):
             self.subscribe = True
             print("Cons. {} optou por aderir. Flexibilidade: {}; Método de Escolha: {}".format(self.unique_id,
                                                                                                self.flexibility,
-                                                                                               choice))
+                                                                                               "Tarifa Convencional"
+                                                                                               if choice == 0
+                                                                                               else "Tarifa Branca"))
         else:
             print("Cons. {} NÃO optou por aderir. Flexibilidade: {}; Método de Escolha: {}".format(self.unique_id,
                                                                                                    self.flexibility,
-                                                                                                   choice))
+                                                                                                   "Tarifa Convencional"
+                                                                                                   if choice == 0
+                                                                                                   else "Tarifa Branca"))
 
     @staticmethod
     def choose_subscription():
@@ -42,4 +46,4 @@ class Consumer(Agent):
         0: Tarifa Convencional
         1: Tarifa Branca
         """
-        return np.random.choice([0, 0.5])
+        return np.random.choice([0, 1])
