@@ -1,6 +1,8 @@
 import numpy as np
 from mesa import Agent
 
+from utils.ConsumerProfile import ConsumerProfile
+
 
 class Consumer(Agent):
     """
@@ -21,9 +23,10 @@ class Consumer(Agent):
         super().__init__(unique_id, model)
         self.subscribe = False
         self.flexibility = np.random.rand()
-        # self.consumption = ChargeCurve(obj1, obj2, obj3, obj4...) add this later
+        self.consumer_profile = ConsumerProfile(self.unique_id)
 
     def step(self):
+        self.consumer_profile.plot_consumer_profile()
         choice = self.choose_subscription()
         if (self.flexibility + choice) / 2 >= 0.5:
             self.subscribe = True

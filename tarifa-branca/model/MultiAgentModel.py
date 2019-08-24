@@ -10,7 +10,7 @@ class MultiAgentModel(Model):
         self.schedule = BaseScheduler(self)
 
         # Creating the environment and adding it to the scheduler, so I can access it on every agent step
-        environment = Environment.Environment(N*2, self, tariff_mode="white-tariff")
+        environment = Environment.Environment(N, self)
         self.schedule.add(environment)
 
         # Creating agents
