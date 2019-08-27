@@ -1,5 +1,5 @@
 Produto,Potência Média (Watts),Dias estimados Uso/Mês,horasDia,Consumo (kWh),MaxQuant,Intervalos de uso
-Ar-condicionado tipo split de 9.001 a 15.000 BTU,780,30,8,6.24,2,"[[22,6]]"
+Ar-condicionado tipo split de 9.001 a 15.000 BTU,780,30,8,6.24,2,"[[20,6]]"
 Chuveiro elétrico 3500W - 5000 W,4125,30,1,4.125,3,"[[5,9], [17,22]]"
 Geladeira,100,30,24,2.4,1,"[[0,24]]"
 Televisão,240,30,5,1.2,2,"[[9,13],[17,23]]"

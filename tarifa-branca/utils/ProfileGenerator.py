@@ -4,13 +4,14 @@ import pandas as pd
 
 
 def generate_profile(agent_id):
+    print("generating profile for agent " + str(agent_id))
     product_list = open_product_list()
     consumer_products = create_consumer_products()
 
     for product in product_list.get_values():
         consumer_products.append(map_product_to_consumer(product))
 
-    print("generating profile for agent " + str(agent_id))
+    return consumer_products
 
 
 def open_product_list():
@@ -27,9 +28,10 @@ def map_product_to_consumer(product):
         "Produto": product["Produto"],
         "Quantidade": random.randrange(product["MaxQuant"]),
         "Consumo (kWh)": product["Consumo (kWh)"],
-        "timeOfUse": chose_time_of_use(product["Intervalos de uso"], product["horasDia"])
+        "timeOfUse": choose_time_of_use(product["Intervalos de uso"], product["horasDia"])
 
     }
 
-def chose_time_of_use(time_intervals):
-    
+
+def choose_time_of_use(time_interval, hours_of_use):
+    return [1, 3, 20]
