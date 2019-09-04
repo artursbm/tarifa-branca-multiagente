@@ -1,15 +1,21 @@
-import random
-
 import pandas as pd
+import numpy as np
 
 
 def generate_profile(agent_id):
-    print("generating profile for agent " + str(agent_id))
+    print(f"generating profile for agent {agent_id}")
     product_list = open_product_list()
-    consumer_products = create_consumer_products()
+    consumer_products = pd.DataFrame(columns=["Produto", "Consumo (kWh)", "timeOfUse"])
 
-    for product in product_list.get_values():
-        consumer_products.append(map_product_to_consumer(product))
+    for index, product in product_list.iterrows():
+        # This is to guarantee that at least one of each product will be present in the consumer's list
+        quant = np.random.choice(np.arange(1, product["MaxQuant"]+1)) if product["MaxQuant"] > 1 else 1
+        for q in np.arange(quant):
+            consumer_products = consumer_products.append({
+                "Produto": product.get_values()[0],
+                "Consumo (kWh)": product["Consumo (kWh)"],
+                "timeOfUse": choose_time_of_use(product["horasDia"], product["useRange"])
+            }, ignore_index=True)
 
     return consumer_products
 
@@ -18,20 +24,6 @@ def open_product_list():
     return pd.read_csv("./utils/aparelhos_selecionados.csv")
 
 
-def create_consumer_products():
-    # initialize empty consumer product profile with defined columns
-    return pd.DataFrame(["Produto", "Quantidade", "Consumo (kWh)", "timeOfUse"])
-
-
-def map_product_to_consumer(product):
-    return {
-        "Produto": product["Produto"],
-        "Quantidade": random.randrange(product["MaxQuant"]),
-        "Consumo (kWh)": product["Consumo (kWh)"],
-        "timeOfUse": choose_time_of_use(product["Intervalos de uso"], product["horasDia"])
-
-    }
-
-
-def choose_time_of_use(time_interval, hours_of_use):
+def choose_time_of_use(hours_of_use, time_range):
     return [1, 3, 20]
+
