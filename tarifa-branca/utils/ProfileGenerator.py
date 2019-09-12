@@ -41,4 +41,16 @@ def choose_time_of_use(hours_of_use, time_range):
         else:
             return np.array(random.sample(range(time_arr[0], time_arr[1]), hours_of_use))
     else:
-        return np.arange(16, 21)
+        # need to make the same steps as above, but for n ranges. Then, will take each and
+        # draw the number of uses from both of them, randomly
+        final_time_range = list()
+        for time in time_arr:
+            time = time[0].split(',')
+            time = [int(t) for t in time]
+            if time[0] > time[1]:
+                h = time[1] + 25
+                time_of_use = random.sample(range(time[0], h), hours_of_use)
+                time_of_use = [t - 24 if t >= 24 else t for t in time_of_use]
+                return np.array(time_of_use, )
+            else:
+                return np.array(random.sample(range(time[0], time[1]), hours_of_use))
