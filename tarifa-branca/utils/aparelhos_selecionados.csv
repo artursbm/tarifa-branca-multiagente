@@ -1,0 +1,12 @@
+Produto,Potência Média (Watts),Dias estimados Uso/Mês,horasDia,Consumo (kWh),MaxQuant,useRange
+"Ar-condicionado tipo split de 9.001 a 15.000 BTU",780,30,8,6.24,2,"[[20,6]]"
+"Chuveiro elétrico 3500W - 5000 W",4125,30,2,4.125,3,"[[5,7],[17,22]]"
+"Geladeira",100,30,24,2.4,1,"[[0,24]]"
+"Televisão",240,30,5,1.2,2,"[[9,13],[17,23]]"
+"Lavadora de louças",1500,30,1,1.5,1,"[[7,21]]"
+"Ventilador de teto",120,30,8,0.96,4,"[[0,24]]"
+"Circulador de ar",90,30,8,0.72,1,"[[0,24]]"
+"Exaustor de fogão",170,30,4,0.68,1,"[[9,15]]"
+"Computadores",95,30,8,0.76,2,"[[9,20]]"
+"Aparelhos eletrônicos",15,30,24,0.36,3,"[[0,24]]"
+"Lâmpadas",30,30,5,0.15,20,"[[5,24]]"
