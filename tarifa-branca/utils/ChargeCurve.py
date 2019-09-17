@@ -48,6 +48,6 @@ class ChargeCurve:
 
         s.legend()
         plt.ylabel('R$/kWh')
-        plt.xlabel('horário')
+        plt.xlabel('Horário')
         plt.title("Custos de Tarifa Branca vs. Tarifa Convencional")
         plt.show()

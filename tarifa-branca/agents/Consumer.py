@@ -30,17 +30,9 @@ class Consumer(Agent):
         choice = self.choose_subscription()
         if (self.flexibility + choice) / 2 >= 0.5:
             self.subscribe = True
-            print("Cons. {} optou por aderir. Flexibilidade: {}; Método de Escolha: {}".format(self.unique_id,
-                                                                                               self.flexibility,
-                                                                                               "Tarifa Convencional"
-                                                                                               if choice == 0
-                                                                                               else "Tarifa Branca"))
+            print(f'Cons. {self.unique_id} optou por aderir à Tarifa Branca. Flexibilidade: {self.flexibility}')
         else:
-            print("Cons. {} NÃO optou por aderir. Flexibilidade: {}; Método de Escolha: {}".format(self.unique_id,
-                                                                                                   self.flexibility,
-                                                                                                   "Tarifa Convencional"
-                                                                                                   if choice == 0
-                                                                                                   else "Tarifa Branca"))
+            print(f'Cons. {self.unique_id} se manterá na Tarifa Convencional. Flexibilidade: {self.flexibility}')
 
     @staticmethod
     def choose_subscription():
@@ -50,3 +42,7 @@ class Consumer(Agent):
         1: Tarifa Branca
         """
         return np.random.choice([0, 1])
+
+    @staticmethod
+    def tariff_mode(choice):
+        return "Tarifa Convencional" if choice == 0 else "Tarifa Branca"
