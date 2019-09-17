@@ -7,7 +7,7 @@ class ConsumerProfile:
         self.profile = pg.generate_profile(self.idx)
 
     def plot_consumer_profile(self):
-        self.profile
+        print(self.profile.head())
         # fig = plt.figure()
         # s = fig.add_subplot(111)
         # s.bar(np.arange(0.5, 24.5, 1), self.profile)

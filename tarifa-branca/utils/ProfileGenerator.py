@@ -27,7 +27,7 @@ def open_product_list():
 
 def choose_time_of_use(hours_of_use, time_range):
     if time_range == '[[0,24]]' and hours_of_use == 24:
-        return np.arange(0, 25)
+        return np.arange(0, 24.5, 0.5)
     time_arr = time_range.strip('[[').strip(']]').split('],[')
     # case where the array of times of use is bigger than 1
     if len(time_arr) == 1:
@@ -35,22 +35,28 @@ def choose_time_of_use(hours_of_use, time_range):
         time_arr = [int(t) for t in time_arr]
         if time_arr[0] > time_arr[1]:
             h = time_arr[1] + 25
-            time_of_use = random.sample(range(time_arr[0], h), hours_of_use)
-            time_of_use = [t-24 if t >= 24 else t for t in time_of_use]
-            return np.array(time_of_use, )
+            tou = random.sample(range(time_arr[0], h), hours_of_use)
+            tou = [t-24 if t >= 24 else t for t in tou]
+            return np.array(generate_time_of_use_range(tou))
         else:
-            return np.array(random.sample(range(time_arr[0], time_arr[1]), hours_of_use))
+            return generate_time_of_use_range(random.sample(range(time_arr[0], time_arr[1]+1), hours_of_use))
+
     else:
-        # need to make the same steps as above, but for n ranges. Then, will take each and
-        # draw the number of uses from both of them, randomly
         final_time_range = list()
-        for time in time_arr:
-            time = time[0].split(',')
+
+        for tm in time_arr:
+            time = tm.split(',')
             time = [int(t) for t in time]
-            if time[0] > time[1]:
-                h = time[1] + 25
-                time_of_use = random.sample(range(time[0], h), hours_of_use)
-                time_of_use = [t - 24 if t >= 24 else t for t in time_of_use]
-                return np.array(time_of_use, )
-            else:
-                return np.array(random.sample(range(time[0], time[1]), hours_of_use))
+            res = np.array(random.sample(range(time[0], time[1]+1), hours_of_use))
+            final_time_range.extend(res)
+
+        tou = np.array(random.sample(final_time_range, hours_of_use))
+        return generate_time_of_use_range(tou.tolist())
+
+
+def generate_time_of_use_range(time_of_use):
+    tou = time_of_use
+    time_of_use.extend([r - 0.5 for r in tou if r > 0])
+    time_of_use.extend([r + 0.5 for r in tou if r + 0.5 not in time_of_use])
+    time_of_use.sort()
+    return np.array(time_of_use)
