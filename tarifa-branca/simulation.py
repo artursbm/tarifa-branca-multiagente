@@ -4,4 +4,5 @@ from model.MultiAgentModel import MultiAgentModel
 
 # for i in range(10):
 sim_model_white_tariff = MultiAgentModel(10)
+
 sim_model_white_tariff.step()
