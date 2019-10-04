@@ -23,3 +23,7 @@ class ConsumerProfile:
         plt.xlabel('Horário')
         plt.title(f"Perfil de consumo energético do agente {self.idx}")
         plt.show()
+
+    @staticmethod
+    def generate_new_consumer_profile(products):
+        return pg.generate_profile(products)
