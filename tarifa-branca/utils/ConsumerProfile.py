@@ -10,7 +10,6 @@ class ConsumerProfile:
         self.profile = pg.generate_profile(self.products)
 
     def plot_consumer_profile(self):
-        print(self.profile)
         fig = plt.figure()
         s = fig.add_subplot(111)
         s.set_xticks(range(0, 25))
@@ -24,6 +23,5 @@ class ConsumerProfile:
         plt.title(f"Perfil de consumo energético do agente {self.idx}")
         plt.show()
 
-    @staticmethod
-    def generate_new_consumer_profile(products):
-        return pg.generate_profile(products)
+    def generate_new_consumer_profile(self):
+        pg.regenerate_profile(self)

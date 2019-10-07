@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def generate_product_list(agent_id):
-    print(f"generating profile for agent {agent_id}")
+    print(f"Generating profile for agent {agent_id}")
     product_list = open_product_list()
     consumer_products = pd.DataFrame(columns=["Produto", "Consumo (kWh)", "timeOfUse"])
 
@@ -35,6 +35,28 @@ def generate_profile(products):
         j += 1
 
     return pd.DataFrame({"time": daytime, "value": day_consumption_profile})
+
+
+def rearrange_times(products):
+    pass
+
+
+def regenerate_profile(self_):
+    # Must first organize products shuffling the ones used during highest cost tariff, then will redistribute them
+    # until the total cost gets lower than the threshold
+    products = self_.products
+    products_to_rearrange = pd.DataFrame(columns=["Produto", "Consumo (kWh)", "timeOfUse"])
+    for i, p in products.iterrows():
+        if p["timeOfUse"] != np.arange(0, 24.5, 0.5) and np.in1d(np.arange(17,20.5,0.5), p["timeOfUse"]):
+            products_to_rearrange = products_to_rearrange.append(p)
+
+    products_to_rearrange = products_to_rearrange.sample(frac=1).reset_index(drop=True)
+    for i, prod in products_to_rearrange:
+        print(prod)
+        # while the cost is bigger than conventional tariff or is simply bigger,
+        # set new time of use for that product.
+
+    return self_
 
 
 def open_product_list():

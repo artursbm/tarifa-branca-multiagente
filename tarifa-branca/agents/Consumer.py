@@ -35,9 +35,8 @@ class Consumer(Agent):
         self.subscribe_to_white_tariff = False
         self.flexibility = float(np.random.rand())
         self.information = float(np.random.rand())
-        # self.knows_white_tariff = np.random.choice([True, False])
-        self.knows_white_tariff = True
-        self.consumer_profile = ConsumerProfile(self.unique_id, )
+        self.knows_white_tariff = np.random.choice([True, False], p=[self.information, (1 - self.information)])
+        self.consumer_profile = ConsumerProfile(self.unique_id)
 
     def step(self):
         self.consumer_profile.plot_consumer_profile()
@@ -49,7 +48,7 @@ class Consumer(Agent):
                   f'\n Informação: {self.information} '
                   f'\n Conhece? {self.knows_white_tariff}')
             print('\n')
-            # TODO: need to retrieve same products, and get new times of use here
+            self.consumer_profile.generate_new_consumer_profile()
             self.consumer_profile.plot_consumer_profile()
         else:
             print(f'Cons. {self.unique_id} se manterá na Tarifa Convencional.'
@@ -82,8 +81,8 @@ class Consumer(Agent):
                 return False
 
             elif wt_total_cost <= ct_total_cost and self_.information >= 0.6:
-                choice = np.random.rand()
-                if ((self_.flexibility * 3) + (self_.information * 2) + choice) / 3 >= 0.5:
+                randomness = np.random.rand()
+                if ((self_.flexibility * 3) + (self_.information * 2) + randomness) / 3 >= 0.5:
                     return True
 
         return False
