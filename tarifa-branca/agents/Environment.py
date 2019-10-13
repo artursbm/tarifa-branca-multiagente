@@ -1,4 +1,5 @@
 from mesa import Agent
+
 from utils.ChargeCurve import ChargeCurve
 
 
