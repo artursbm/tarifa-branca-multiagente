@@ -31,8 +31,8 @@ class ChargeCurve:
                                                              0.51894, 0.51894,
                                                              0.51894, 0.51894])})
 
-        self.conventional_tariff = pd.DataFrame({"time": np.arange(0, 24.5, 0.5),
-                                                 "value": np.array([0.62833] * 49)})
+        self.conventional_tariff = pd.DataFrame({"time": np.arange(0, 24, 0.5),
+                                                 "value": np.array([0.62833] * 48)})
 
     def plot_charge_cost(self):
         fig = plt.figure()
