@@ -31,16 +31,19 @@ class ConsumerProfile:
         s.bar(self.new_profile['time'], self.new_profile['value'],
               align='edge',
               color='blue',
-              label='Perfil de consumo')
+              label='Novo Perfil de consumo')
         s.legend()
         plt.ylabel('kWh')
         plt.xlabel('Horário')
         plt.title(f"Novo Perfil de consumo energético do usuário {self.idx}")
         plt.show()
 
-    def generate_new_consumer_profile(self, envi):
+    def generate_new_consumer_profile(self, envi, flexibility):
         conventional_tariff_cost = envi.characteristic_curve.conventional_tariff['value'] * self.profile[
             'value']
 
         self.new_profile = pg.regenerate_profile(self.products, envi.characteristic_curve.conventional_tariff['value'],
-                                                 sum(conventional_tariff_cost))
+                                                 sum(conventional_tariff_cost), flexibility)
+
+    def copy_profile(self):
+        self.new_profile = self.profile.copy(deep=True)

@@ -11,4 +11,3 @@ class Environment(Agent):
 
     def step(self):
         self.characteristic_curve.plot_charge_cost()
-

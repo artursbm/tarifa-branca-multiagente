@@ -38,44 +38,6 @@ def generate_profile(products):
     return pd.DataFrame({"time": daytime, "value": day_consumption_profile})
 
 
-def regenerate_profile(products, ct_values, ct_total_cost):
-    # Must first organize products shuffling the ones used during highest cost tariff, then will redistribute them
-    # until the total cost gets lower than the threshold
-    products_to_rearrange = pd.DataFrame(columns=["idProduto", "Produto", "Consumo (kWh)", "timeOfUse"])
-    products_aux = products.copy(deep=True)
-    for i, p in products.iterrows():
-        is_peak_time = np.in1d(np.arange(17, 20.5, 0.5), p["timeOfUse"])
-        is_not_all_day = p["timeOfUse"] != np.arange(0, 24.5, 0.5)
-
-        if np.sum(is_not_all_day) != 0 and np.sum(is_peak_time) >= 2:
-            products_to_rearrange = products_to_rearrange.append(p)
-            products_aux.drop(products_aux[products_aux["Produto"] == p["Produto"]].index, inplace=True)
-
-    products_to_rearrange = products_to_rearrange.sample(frac=1).reset_index(drop=True)
-
-    # while the cost is bigger than conventional tariff or is simply bigger,
-    # set new time of use for that product.
-    while sum(ct_values * generate_profile(products)['value']) >= ct_total_cost:
-        for i, prod in products_to_rearrange.iterrows():
-            products_aux = products_aux.append(rearrange_times(prod))
-
-    return generate_profile(products_aux)
-
-
-def rearrange_times(product):
-    print(product)
-    product_list = open_product_list()
-    prod_ref = product_list.loc[product["idProduto"], :]
-    range_ = prod_ref["useRange"]
-    prod_ref["useRange"] = remove_peak_time(range_)
-
-    # find time range where product usage in peak time is not bigger than half hour
-    product["timeOfUSe"] = choose_time_of_use(prod_ref["horasDia"], prod_ref["useRange"])
-
-    print(product)
-    return product
-
-
 def choose_time_of_use(hours_of_use, time_range):
     if time_range == '[[0,24]]' and hours_of_use == 24:
         return np.arange(0, 24.5, 0.5)
@@ -115,66 +77,74 @@ def generate_time_of_use_range(time_of_use):
     return np.array(time_of_use)
 
 
-def remove_peak_time(time_range):
-    time_arr = time_range.strip('[[').strip(']]').split('],[')
-    # case where the array of times of use is bigger than 1
-    if len(time_arr) == 1:
-        time_arr = time_arr[0].split(',')
-        time_arr = [int(t) for t in time_arr]
-        if time_arr[0] > time_arr[1]:
-            h = time_arr[1] + 25
-            tou = np.arange(time_arr[0], h)
-            a = [t - 24 if t >= 24 else t for t in tou]
-        else:
-            a = np.arange(time_arr[0], time_arr[1] + 1)
+def regenerate_profile(products, ct_values, ct_total_cost, flexibility):
+    # Must first organize products shuffling the ones used during highest cost tariff, then will redistribute them
+    # until the total cost gets lower than the threshold
+    products_to_rearrange = pd.DataFrame(columns=["idProduto", "Produto", "Consumo (kWh)", "timeOfUse"])
+    products_aux = products.copy(deep=True)
+    for i, p in products.iterrows():
+        is_peak_time = np.in1d(np.arange(17, 20, 0.5), p["timeOfUse"])
+        is_not_all_day = p["timeOfUse"] != np.arange(0, 24.5, 0.5)
 
-        for i in np.arange(17, 21):
-            a = a[a != i]
+        if np.sum(is_not_all_day) != 0 and np.sum(is_peak_time) >= 2:
+            products_to_rearrange = products_to_rearrange.append(p)
+            products_aux.drop(products_aux[products_aux["Produto"] == p["Produto"]].index, inplace=True)
 
-        b = a[np.where(a < 17)]
-        c = a[np.where(a > 20)]
-        new_time_range = '[['
+    products_to_rearrange = products_to_rearrange.sample(frac=1).reset_index(drop=True)
 
-        if len(b) > 0:
-            b_str_range = str(b.min()) + ',' + str(b.max())
-            new_time_range += b_str_range + ']'
-            if len(c) > 0:
-                c_str_range = str(c.min()) + ',' + str(c.max())
-                new_time_range += ',' + '[' + c_str_range + ']]'
-            else:
-                new_time_range += ']]'
+    # while the cost is bigger than conventional tariff or is simply bigger,
+    # set new time of use for that product.
+    products_to_compare = products.copy()
+    iter_ = 0
+    while sum(ct_values * generate_profile(products_to_compare)['value']) >= ct_total_cost and iter_ < 2:
+        for i, prod in products_to_rearrange.iterrows():
+            products_aux = products_aux.append(rearrange_times(prod, flexibility))
+            products_to_compare = products_aux.copy()
+            products_to_compare = products_to_compare.reset_index()
 
-        elif len(c) > 0:
-            c_str_range = str(c.min()) + ',' + str(c.max())
-            new_time_range += c_str_range + ']]'
+        iter_ += 1
+        wtc = sum(ct_values * generate_profile(products_to_compare)['value'])
+        print(f'[Iteration {iter_}] wtc = {wtc}')
 
+    return generate_profile(products_aux.reset_index())
+
+
+def rearrange_times(product, flexibility):
+    product_list = open_product_list()
+    prod_ref = product_list.loc[product["idProduto"], :]
+    use_range = prod_ref["useRange"].split('],[')
+    if len(use_range) == 2:
+        # just need the second interval, since it's the only one that contains peak charge time
+        range_ = [int(i) for i in use_range[1].strip('[[').strip(']]').split(',')]
     else:
-        second_time_arr = time_arr[1].split(',')
-        second_time_arr = [int(t) for t in second_time_arr]
-        a = np.arange(second_time_arr[0], second_time_arr[1] + 1)
-        for i in np.arange(17, 21):
-            a = a[a != i]
+        range_ = [int(i) for i in use_range[0].strip('[[').strip(']]').split(',')]
 
-        b = a[np.where(a < 17)]
-        c = a[np.where(a > 20)]
-        new_time_range = '[['
+    range_array = np.arange(range_[0], range_[1] + 0.5, 0.5)
+    is_peak_in_range_idx = np.where(np.in1d(range_array, get_peak_range()) == True)[0]
+    new_range_array = np.delete(range_array, is_peak_in_range_idx)
 
-        if len(b) > 0:
-            b_str_range = str(b.min()) + ',' + str(b.max())
-            new_time_range += b_str_range + ']'
-            if len(c) > 0:
-                c_str_range = str(c.min()) + ',' + str(c.max())
-                new_time_range += ',' + '[' + c_str_range + ']]'
-            else:
-                new_time_range += ']]'
+    prod_tou = product["timeOfUse"]
+    is_peak_in_tou_idx = np.where(np.in1d(prod_tou, get_peak_range()) == True)[0]
+    np.random.shuffle(is_peak_in_tou_idx)
+    # flexibility % of the time of use will be changed
+    number_of_removed_ranges = round(flexibility * len(is_peak_in_tou_idx))
+    new_prod_tou = np.delete(prod_tou, is_peak_in_tou_idx[0:number_of_removed_ranges])
 
-        elif len(c) > 0:
-            c_str_range = str(c.min()) + ',' + str(c.max())
-            new_time_range += c_str_range + ']]'
+    new_choosable_times_idx = np.where(np.in1d(new_range_array, new_prod_tou) == True)[0]
+    new_choosable_times = np.delete(new_range_array, new_choosable_times_idx)
+    if number_of_removed_ranges < len(new_choosable_times):
+        final_prod_tou = np.append(new_prod_tou,
+                                   np.array(random.sample(new_choosable_times.tolist(), number_of_removed_ranges)))
+        new_prod_tou = final_prod_tou
 
-        new_time_range = '[[' + str(time_arr[1]) + ',' + new_time_range
+    new_prod_tou.sort()
 
-    return new_time_range
+    product["timeOfUse"] = new_prod_tou
+    return product
+
+
+def get_peak_range():
+    return np.arange(17, 20, 0.5)
 
 
 def open_product_list():
