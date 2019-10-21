@@ -1,4 +1,5 @@
 from mesa import Agent
+
 from utils.ChargeCurve import ChargeCurve
 
 
@@ -10,4 +11,3 @@ class Environment(Agent):
 
     def step(self):
         self.characteristic_curve.plot_charge_cost()
-
