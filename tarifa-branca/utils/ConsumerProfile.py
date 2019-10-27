@@ -38,11 +38,35 @@ class ConsumerProfile:
         plt.title(f"Novo Perfil de consumo energético do usuário {self.idx}")
         plt.show()
 
+    def plot_profile_comparison(self):
+        fig, (ax1, ax2) = plt.subplots(2)
+        fig.suptitle(x=0.5, y=1.0, t=f'Comparativo de Perfil de consumo - Agente {self.idx}')
+        ax1.bar(self.profile['time'], self.profile['value'],
+                align='edge',
+                color='blue',
+                label='Perfil de consumo antes')
+
+        ax2.bar(self.new_profile['time'], self.new_profile['value'],
+                align='edge',
+                color='blue',
+                label='Perfil de consumo depois')
+
+        ax1.set_xticks(range(0, 25))
+        ax2.set_xticks(range(0, 25))
+
+        ax1.set_xlabel(xlabel="Horário")
+        ax1.set_ylabel(ylabel="kWh")
+
+        ax2.set_xlabel(xlabel="Horário")
+        ax2.set_ylabel(ylabel="kWh")
+
+        plt.show()
+
     def generate_new_consumer_profile(self, envi, flexibility):
         conventional_tariff_cost = envi.characteristic_curve.conventional_tariff['value'] * self.profile[
             'value']
 
-        self.new_profile = pg.regenerate_profile(self.products, envi.characteristic_curve.conventional_tariff['value'],
+        self.new_profile = pg.regenerate_profile(self.products, envi.characteristic_curve.white_tariff['value'],
                                                  sum(conventional_tariff_cost), flexibility)
 
     def copy_profile(self):

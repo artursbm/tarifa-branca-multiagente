@@ -77,7 +77,7 @@ def generate_time_of_use_range(time_of_use):
     return np.array(time_of_use)
 
 
-def regenerate_profile(products, ct_values, ct_total_cost, flexibility):
+def regenerate_profile(products, wt_values, ct_total_cost, flexibility):
     # Must first organize products shuffling the ones used during highest cost tariff, then will redistribute them
     # until the total cost gets lower than the threshold
     products_to_rearrange = pd.DataFrame(columns=["idProduto", "Produto", "Consumo (kWh)", "timeOfUse"])
@@ -96,14 +96,15 @@ def regenerate_profile(products, ct_values, ct_total_cost, flexibility):
     # set new time of use for that product.
     products_to_compare = products.copy()
     iter_ = 0
-    while sum(ct_values * generate_profile(products_to_compare)['value']) >= ct_total_cost and iter_ < 2:
+    wtc = sum(wt_values * generate_profile(products_to_compare)['value'])
+    while wtc >= ct_total_cost and iter_ < 2:
         for i, prod in products_to_rearrange.iterrows():
             products_aux = products_aux.append(rearrange_times(prod, flexibility))
             products_to_compare = products_aux.copy()
             products_to_compare = products_to_compare.reset_index()
 
         iter_ += 1
-        wtc = sum(ct_values * generate_profile(products_to_compare)['value'])
+        wtc = sum(wt_values * generate_profile(products_to_compare)['value'])
         print(f'[Iteration {iter_}] wtc = {wtc}')
 
     return generate_profile(products_aux.reset_index())
