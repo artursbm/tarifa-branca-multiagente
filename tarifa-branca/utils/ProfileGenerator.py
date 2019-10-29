@@ -97,7 +97,7 @@ def regenerate_profile(products, wt_values, ct_total_cost, flexibility):
     products_to_compare = products.copy()
     iter_ = 0
     wtc = sum(wt_values * generate_profile(products_to_compare)['value'])
-    while wtc >= ct_total_cost and iter_ < 2:
+    while wtc >= ct_total_cost and iter_ < 10:
         for i, prod in products_to_rearrange.iterrows():
             products_aux = products_aux.append(rearrange_times(prod, flexibility))
             products_to_compare = products_aux.copy()
@@ -107,7 +107,11 @@ def regenerate_profile(products, wt_values, ct_total_cost, flexibility):
         wtc = sum(wt_values * generate_profile(products_to_compare)['value'])
         print(f'[Iteration {iter_}] wtc = {wtc}')
 
-    return generate_profile(products_aux.reset_index())
+    # if the cost is always higher, then consumer will get back to old habits
+    if wtc > ct_total_cost:
+        return generate_profile(products)
+    else:
+        return generate_profile(products_aux.reset_index())
 
 
 def rearrange_times(product, flexibility):

@@ -43,7 +43,6 @@ class Consumer(Agent):
 
     def step(self):
         # Retrieving environment agent in consumer agent step
-        # environment.characteristic_curve.white_tariff
         envi = self.model.schedule.agents[0]
         wtc = envi.characteristic_curve.white_tariff['value'] * self.consumer_profile.profile['value']
         ctc = envi.characteristic_curve.conventional_tariff['value'] * self.consumer_profile.profile[
@@ -51,7 +50,6 @@ class Consumer(Agent):
         self.ctc = sum(ctc)
         self.wtc = sum(wtc)
 
-        # self.consumer_profile.plot_consumer_profile()
         self.subscribe_to_white_tariff = self.choose_subscription(self.information, self.flexibility,
                                                                   self.knows_white_tariff, self.wtc, self.ctc)
 
@@ -63,18 +61,16 @@ class Consumer(Agent):
                   f'\n Conhece? {self.knows_white_tariff}'
                   f'\n Valor Tarifa Convencional: {self.ctc}'
                   f'\n Valor da Tarifa Branca: {self.wtc}')
+
+            # if cost of white tariff is already lower than conventional, user will stick with its habits.
             if sum(wtc) >= sum(ctc):
-                # if cost of white tariff is already lower than conventional, user will stick with its habits.
                 self.consumer_profile.generate_new_consumer_profile(envi, self.flexibility)
                 new_wtc = envi.characteristic_curve.white_tariff['value'] * self.consumer_profile.new_profile['value']
                 self.wtc = sum(new_wtc)
                 self.changed_habits = True
                 print(f'Valor da Tarifa Branca: {self.wtc}')
-                self.consumer_profile.plot_profile_comparison()
             else:
                 self.consumer_profile.copy_profile()
-
-            # self.consumer_profile.plot_consumer_new_profile()
 
         else:
             print(f'Cons. {self.unique_id} se manterá na Tarifa Convencional.'
