@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 import utils.ProfileGenerator as pg
 
@@ -52,7 +53,10 @@ class ConsumerProfile:
                 label='Perfil de consumo depois')
 
         ax1.set_xticks(range(0, 25))
+        ax1.set_yticks(np.arange(0, 35, 0.75))
+
         ax2.set_xticks(range(0, 25))
+        ax2.set_xticks(np.arange(0, 35, 0.75))
 
         ax1.set_xlabel(xlabel="Horário")
         ax1.set_ylabel(ylabel="kWh")
