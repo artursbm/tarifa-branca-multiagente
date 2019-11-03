@@ -69,8 +69,11 @@ class Consumer(Agent):
                 self.wtc = sum(new_wtc)
                 self.changed_habits = True
                 print(f'Valor da Tarifa Branca: {self.wtc}')
+                print('\n')
+
             else:
                 self.consumer_profile.copy_profile()
+                print('\n')
 
         else:
             print(f'Cons. {self.unique_id} se manterá na Tarifa Convencional.'

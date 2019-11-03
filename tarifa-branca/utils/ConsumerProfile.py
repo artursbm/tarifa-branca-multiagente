@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
-import numpy as np
+import plotly
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 import utils.ProfileGenerator as pg
 
@@ -40,31 +42,31 @@ class ConsumerProfile:
         plt.show()
 
     def plot_profile_comparison(self):
-        fig, (ax1, ax2) = plt.subplots(2)
-        fig.suptitle(x=0.5, y=1.0, t=f'Comparativo de Perfil de consumo - Agente {self.idx}')
-        ax1.bar(self.profile['time'], self.profile['value'],
-                align='edge',
-                color='blue',
-                label='Perfil de consumo antes')
-
-        ax2.bar(self.new_profile['time'], self.new_profile['value'],
-                align='edge',
-                color='blue',
-                label='Perfil de consumo depois')
-
-        ax1.set_xticks(range(0, 25))
-        ax1.set_yticks(np.arange(0, 35, 0.75))
-
-        ax2.set_xticks(range(0, 25))
-        ax2.set_xticks(np.arange(0, 35, 0.75))
-
-        ax1.set_xlabel(xlabel="Horário")
-        ax1.set_ylabel(ylabel="kWh")
-
-        ax2.set_xlabel(xlabel="Horário")
-        ax2.set_ylabel(ylabel="kWh")
-
-        plt.show()
+        fig = make_subplots(rows=2, cols=1, subplot_titles=("Consumo antes", "Consumo depois"))
+        fig.add_trace(
+            go.Bar(
+                x=self.profile['time'],
+                y=self.profile['value'],
+            ),
+            row=1,
+            col=1
+        )
+        fig.add_trace(
+            go.Bar(
+                x=self.new_profile['time'],
+                y=self.new_profile['value'],
+            ),
+            row=2,
+            col=1
+        )
+        fig.update_xaxes(title_text='Horário', tick0=0, dtick=1, row=1, col=1)
+        fig.update_xaxes(title_text='Horário', tick0=0, dtick=1, row=2, col=1)
+        fig.update_yaxes(title_text='kWh', range=[0, 30], row=2, col=1)
+        fig.update_yaxes(title_text='kWh', range=[0, 30], row=2, col=1)
+        fig.update_layout(showlegend=False,
+                          title_text=f'Comparativo de Perfil de consumo - Agente {self.idx}',
+                          )
+        plotly.offline.plot(fig, filename=f'agent_{self.idx}.html')
 
     def generate_new_consumer_profile(self, envi, flexibility):
         conventional_tariff_cost = envi.characteristic_curve.conventional_tariff['value'] * self.profile[

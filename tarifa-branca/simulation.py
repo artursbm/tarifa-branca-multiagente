@@ -1,8 +1,10 @@
 from timeit import default_timer as timer
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import plotly
+import plotly.express as px
+import plotly.graph_objects as go
 
 from model.MultiAgentModel import MultiAgentModel
 
@@ -24,6 +26,12 @@ total_charge_consumption_after_decision = np.zeros(len(daytime))
 white_tariff_consumers = 0
 wt_cons_habit_changed = 0
 diff_wtc_costs = list()
+flex_wtc = list()
+info_wtc = list()
+flex_wtc_no_habit = list()
+info_wtc_no_habit = list()
+flex_ctc = list()
+info_ctc = list()
 
 for i in all_agents:
     for j, v in i.consumer_profile.profile.iterrows():
@@ -36,11 +44,25 @@ for i in all_agents:
         for k, vl in i.consumer_profile.new_profile.iterrows():
             total_charge_consumption_after_decision[k] += (vl['value'] / n_agents)
 
+    if not i.subscribe_to_white_tariff:
+        flex_ctc.append(i.flexibility)
+        info_ctc.append(i.information)
+
+    if i.subscribe_to_white_tariff and not i.changed_habits:
+        flex_wtc_no_habit.append(i.flexibility)
+        info_wtc_no_habit.append(i.information)
+
     if i.subscribe_to_white_tariff:
         white_tariff_consumers += 1
     if i.changed_habits:
+        flex_wtc.append(i.flexibility)
+        info_wtc.append(i.information)
+
         wt_cons_habit_changed += 1
-        diff_wtc_costs.append({"agent": i, "id": i.unique_id, "diff": abs(i.ctc - i.wtc)})
+        diff_wtc_costs.append({
+            "agent": i,
+            "id": i.unique_id,
+            "diff": abs(i.ctc - i.wtc)})
 
 # Análises locais
 diff_wtc_costs = sorted(diff_wtc_costs, key=lambda l: l['diff'])
@@ -54,12 +76,14 @@ agent_saving_more['agent'].consumer_profile.products.to_csv(
 print(f'O Agente que MAIS economizou foi o {agent_saving_more["id"]};'
       f' Valor TB: {agent_saving_more["agent"].wtc}; '
       f' Valor Anterior: {agent_saving_more["agent"].ctc}')
+print('\n')
 
 agent_saving_more['agent'].consumer_profile.plot_profile_comparison()
 
 print(f'O Agente que MENOS economizou foi o {agent_saving_less["id"]};'
       f' Valor TB: {agent_saving_less["agent"].wtc};'
       f' Valor Anterior: {agent_saving_less["agent"].ctc}')
+print('\n')
 
 agent_saving_less['agent'].consumer_profile.plot_profile_comparison()
 
@@ -71,35 +95,133 @@ print(f'\n'
       f'{white_tariff_consumers} consumidores aderiram à tarifa Branca ({100 * white_tariff_consumers / n_agents}%);\n'
       f'{wt_cons_habit_changed} consumidores mudaram seus hábitos ({100 * wt_cons_habit_changed / n_agents}%);')
 
-fig = plt.figure()
-s = fig.add_subplot(111)
-s.set_xticks(range(0, 25))
-s.set_yticks(np.arange(0, 21, 0.75))
-s.bar(consumption_prior_decision['time'], consumption_prior_decision['charge'],
-      align='edge',
-      color='red',
-      label='Consumo horário')
-s.legend()
-plt.ylabel('kWh')
-plt.xlabel('Horário')
-plt.title(f"Perfil de consumo energético da população")
-plt.show()
+x = ['Tarifa Branca', 'Tarifa Convencional']
+y = [white_tariff_consumers, (n_agents - white_tariff_consumers)]
+hover = [f'{100 * white_tariff_consumers / n_agents}%', f'{100 * (n_agents - white_tariff_consumers) / n_agents}%']
+figP = go.Figure(data=[go.Bar(x=x, y=y, text=hover, textposition='auto')])
+figP.update_traces(marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',
+                   marker_line_width=1.5, opacity=0.6)
+figP.update_layout(title_text='Proporção de adesão à Tarifa Branca')
+plotly.offline.plot(figP, filename='proporcao_adesao.html')
 
-fig2 = plt.figure()
-s2 = fig2.add_subplot(111)
-s2.set_xticks(range(0, 25))
-s2.set_yticks(np.arange(0, 21, 0.75))
-s2.bar(consumption_prior_decision['time'], consumption_after_decision['charge'],
-       align='edge',
-       color='blue',
-       label='Consumo horário')
-s2.legend()
-plt.ylabel('kWh')
-plt.xlabel('Horário')
-plt.title(f"Perfil de consumo energético da população após decisões")
-plt.show()
+fig = go.Figure()
+fig.add_trace(go.Bar(x=daytime,
+                     y=consumption_prior_decision['charge'],
+                     name='Antes',
+                     marker_color='rgb(55, 83, 109)'
+                     ))
+fig.add_trace(go.Bar(x=daytime,
+                     y=consumption_after_decision['charge'],
+                     name='Depois',
+                     marker_color='rgb(26, 118, 255)'
+                     ))
+fig.update_layout(
+    title='Comparativo de perfil médio de consumo energético da população',
+    xaxis_tickfont_size=12,
+    xaxis=dict(
+        title='Horário',
+        tickmode='linear',
+        tick0=0,
+        dtick=1
+    ),
+    yaxis=dict(
+        title='kWh',
+        tickmode='linear',
+        tick0=0,
+        dtick=1
+    ),
+    legend=dict(
+        x=0,
+        y=1.0,
+        bgcolor='rgba(255, 255, 255, 0)',
+        bordercolor='rgba(255, 255, 255, 0)'
+    ),
+    barmode='group',
+    bargap=0.15,  # gap between bars of adjacent location coordinates.
+    bargroupgap=0.1  # gap between bars of the same location coordinate.
+)
+plotly.offline.plot(fig, filename='population_before_after.html')
 
-# TODO: plot graphics for some agents that changed habits
-# self.consumer_profile.plot_profile_comparison()
+fig = px.bar(consumption_prior_decision, x='time', y='charge',
+             color='charge',
+             labels={'time': 'Horário', 'charge': 'kWh'})
+fig.update_layout(
+    title_text='Consumo médio da População - ANTES',
+    xaxis=dict(
+        tickmode='linear',
+        tick0=0,
+        dtick=1
+    ),
+    yaxis=dict(
+        tickmode='linear',
+        tick0=0,
+        dtick=1
+    )
+)
+plotly.offline.plot(fig, filename='consumption_prior_decision.html')
+
+fig = px.bar(consumption_after_decision, x='time', y='charge',
+             color='charge',
+             labels={'time': 'Horário', 'charge': 'kWh'})
+fig.update_layout(
+    title_text='Consumo médio da População - DEPOIS',
+    xaxis=dict(
+        tickmode='linear',
+        tick0=0,
+        dtick=1
+    ),
+    yaxis=dict(
+        tickmode='linear',
+        tick0=0,
+        dtick=1
+    )
+)
+plotly.offline.plot(fig, filename='consumption_after_decision.html')
+
+fig_flex_info = go.Figure()
+x = ['TB COM Mudança de hábito', 'TB SEM Mudança de hábito', 'Tarifa Convencional']
+y_flex = [round(np.median(flex_wtc), 4), round(np.median(flex_wtc_no_habit), 4), round(np.median(flex_ctc), 4)]
+y_info = [round(np.median(info_wtc), 4), round(np.median(info_wtc_no_habit), 4), round(np.median(info_ctc), 4)]
+
+fig_flex_info.add_trace(go.Bar(x=x,
+                               y=y_flex,
+                               text=y_flex,
+                               textposition='auto',
+                               name='Flexibilidade',
+                               marker_color='rgb(65, 34, 168)'
+                               ))
+fig_flex_info.add_trace(go.Bar(x=x,
+                               y=y_info,
+                               text=y_info,
+                               textposition='auto',
+                               name='Informação',
+                               marker_color='rgb(105, 48, 145)'
+                               ))
+fig_flex_info.update_layout(
+    title='Mediana de flexibilidade e informação dos consumidores de acordo com a modalidade de tarifa',
+    xaxis_tickfont_size=12,
+    legend=dict(
+        x=0,
+        y=1.0,
+        bgcolor='rgba(255, 255, 255, 0)',
+        bordercolor='rgba(255, 255, 255, 0)'
+    ),
+    barmode='group',
+    bargap=0.15,  # gap between bars of adjacent location coordinates.
+    bargroupgap=0.1  # gap between bars of the same location coordinate.
+)
+plotly.offline.plot(fig_flex_info, filename='flex_info_by_mode.html')
 
 print(f'\nProgram took {end - start} seconds to run.\n END OF EXECUTION')
+
+'''
+O Agente que MAIS economizou foi o 9876; Valor TB: 297.5343735;  Valor Anterior: 371.7011780999999
+
+O Agente que MENOS economizou foi o 6548; Valor TB: 249.0247973; Valor Anterior: 249.09514520000005
+
+3230 consumidores aderiram à tarifa Branca (32.3%);
+2762 consumidores mudaram seus hábitos (27.62%);
+
+Program took 746.405182405 seconds to run.
+
+'''
