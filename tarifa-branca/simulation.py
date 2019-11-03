@@ -212,16 +212,37 @@ fig_flex_info.update_layout(
 )
 plotly.offline.plot(fig_flex_info, filename='flex_info_by_mode.html')
 
+fig = go.Figure()
+x = ['Consumidor com maior economia', 'Consumidor com menor economia']
+y_flex = [agent_saving_more['agent'].flexibility, agent_saving_less['agent'].flexibility]
+y_info = [agent_saving_more['agent'].information, agent_saving_less['agent'].information]
+fig.add_trace(go.Bar(x=x,
+                     y=y_flex,
+                     text=y_flex,
+                     textposition='auto',
+                     name='Flexibilidade',
+                     marker_color='rgb(65, 34, 168)'
+                     ))
+fig.add_trace(go.Bar(x=x,
+                     y=y_info,
+                     text=y_info,
+                     textposition='auto',
+                     name='Informação',
+                     marker_color='rgb(105, 48, 145)'
+                     ))
+fig.update_layout(
+    title='Flexibilidade e Nível de Informação dos consumidores mais e menos econômicos da Tarifa Branca',
+    xaxis_tickfont_size=12,
+    legend=dict(
+        x=0.5,
+        y=1.0,
+        bgcolor='rgba(255, 255, 255, 0)',
+        bordercolor='rgba(255, 255, 255, 0)'
+    ),
+    barmode='group',
+    bargap=0.15,  # gap between bars of adjacent location coordinates.
+    bargroupgap=0.1  # gap between bars of the same location coordinate.
+)
+plotly.offline.plot(fig, filename='flex_info_agents_less_more.html')
+
 print(f'\nProgram took {end - start} seconds to run.\n END OF EXECUTION')
-
-'''
-O Agente que MAIS economizou foi o 9876; Valor TB: 297.5343735;  Valor Anterior: 371.7011780999999
-
-O Agente que MENOS economizou foi o 6548; Valor TB: 249.0247973; Valor Anterior: 249.09514520000005
-
-3230 consumidores aderiram à tarifa Branca (32.3%);
-2762 consumidores mudaram seus hábitos (27.62%);
-
-Program took 746.405182405 seconds to run.
-
-'''

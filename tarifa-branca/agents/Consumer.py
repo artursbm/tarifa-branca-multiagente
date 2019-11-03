@@ -101,7 +101,7 @@ class Consumer(Agent):
 
             elif wtc <= ctc or info >= 0.5:
                 randomness = np.random.rand()
-                if ((flex * 3) + (info * 2) + randomness) / 2.0 >= 1.0:
+                if ((flex * 3) + (info * 2) + randomness) / 6.0 >= 0.5:
                     return True
 
         return False

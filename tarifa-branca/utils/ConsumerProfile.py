@@ -61,7 +61,7 @@ class ConsumerProfile:
         )
         fig.update_xaxes(title_text='Horário', tick0=0, dtick=1, row=1, col=1)
         fig.update_xaxes(title_text='Horário', tick0=0, dtick=1, row=2, col=1)
-        fig.update_yaxes(title_text='kWh', range=[0, 30], row=2, col=1)
+        fig.update_yaxes(title_text='kWh', range=[0, 30], row=1, col=1)
         fig.update_yaxes(title_text='kWh', range=[0, 30], row=2, col=1)
         fig.update_layout(showlegend=False,
                           title_text=f'Comparativo de Perfil de consumo - Agente {self.idx}',
