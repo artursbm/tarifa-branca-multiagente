@@ -90,6 +90,27 @@ class Consumer(Agent):
         this method will randomly decide between
         stick with Tarifa Convencional
         subscribe to Tarifa Branca
+
+        :ivar flex: defines the agent odds of changing its energy consumption habits, given its current habits and the
+        Environment characteristics (its Charging curve, for example).
+        :type flex: float
+
+        :ivar info: defines the level of information from a consumer, which includes its knowledge on simple finance
+        math, so it can conclude the advantages of changing to "Tarifa Branca".
+        :type info: float
+
+        :ivar knows_wt: defines if an agent knows that "Tarifa Branca" exists; if it doesn't, consumer won't
+        change its subscription.
+        :type knows_wt: bool
+
+        :ivar wtc: defines the cost in R$ of using electricity following the current profile, if the agent is using
+        the Tarifa Branca system.
+        :type wtc: float
+
+        :ivar wtc: defines the cost in R$ of using electricity following the current profile, if the agent is using
+        the conventional tariff system.
+        :type wtc: float
+
         """
 
         if knows_wt:
